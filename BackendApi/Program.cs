@@ -26,7 +26,7 @@ app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactor
         client.DefaultRequestHeaders.Add("X-Auth-Token", token);
         
         // Először próbáljuk meg csak a főbb ligákat, az biztosabb és gyorsabb
-        var response = await client.GetAsync("https://api.football-data.org/v4/matches");
+       var response = await client.GetAsync("https://api.football-data.org/v4/matches?competitions=CL,PL,PD,BL1,SA,FL1");
         
         if (!response.IsSuccessStatusCode)
         {
