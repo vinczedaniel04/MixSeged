@@ -22,19 +22,19 @@ app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactor
         var client = clientFactory.CreateClient();
         var token = config["OddsApiKey"];
         
-        // A Te kívánságlistád:
         string[] ligak = {
-            "soccer_epl", 
-            "soccer_spain_la_liga", 
-            "soccer_germany_bundesliga", 
-            "soccer_italy_serie_a", 
-            "soccer_france_ligue_1",
-            "soccer_hungary_nb1",  // 🔥 EZ A MAGYAR NB1!
-            "soccer_uefa_champs_league",
-            "soccer_uefa_europa_league",
-            "soccer_uefa_europa_conference_league",
-            "soccer_netherlands_ere_divisie",
-            "soccer_portugal_primeira_liga"
+            "soccer_epl",                  // Angol
+            "soccer_spain_la_liga",        // Spanyol
+            "soccer_germany_bundesliga",   // Német
+            "soccer_italy_serie_a",        // Olasz
+            "soccer_france_ligue_1",      // Francia (FONTOS: ligue_1)
+            "soccer_hungary_nb1",         // Magyar (FONTOS: nb1)
+            "soccer_uefa_champs_league",   // BL
+            "soccer_uefa_europa_league",   // EL
+            "soccer_uefa_europa_conference_league", // Konferencia
+            "soccer_netherlands_ere_divisie", // Holland
+            "soccer_portugal_primeira_liga",  // Portugál
+            "soccer_turkey_super_league"      // Török
         };
 
         var mindenMeccs = new List<object>();
