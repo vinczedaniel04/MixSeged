@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tippmix AI - Professional Analysis</title>
+    <title>Tippmix AI Pro - Top Ligák</title>
     <style>
         :root {
             --primary: #1a73e8;
@@ -15,141 +15,36 @@
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: var(--light-bg); 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            color: var(--dark);
-        }
-
-        .container { 
-            width: 100%; 
-            max-width: 900px; 
-            background: white; 
-            min-height: 100vh;
-            box-shadow: var(--shadow);
-            padding-bottom: 50px;
-        }
-
-        /* Header & Navigation */
-        header {
-            background: var(--dark);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 5px solid var(--primary);
-        }
-
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--light-bg); margin: 0; display: flex; justify-content: center; color: var(--dark); }
+        .container { width: 100%; max-width: 900px; background: white; min-height: 100vh; box-shadow: var(--shadow); padding-bottom: 50px; }
+        header { background: var(--dark); color: white; padding: 30px 20px; text-align: center; border-bottom: 5px solid var(--primary); }
         header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
         header p { margin: 10px 0 0; opacity: 0.8; font-size: 14px; }
-
         .content { padding: 20px; }
 
-        /* Main Button */
-        .main-btn { 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            padding: 18px; 
-            width: 100%; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 1.1em;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2);
-            margin-bottom: 25px;
-        }
-
+        .main-btn { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: all 0.3s; box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2); margin-bottom: 25px; }
         .main-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(26, 115, 232, 0.3); }
 
-        /* League Accordion */
-        .liga-fejlec { 
-            background: #fff; 
-            color: var(--dark); 
-            padding: 18px; 
-            margin-top: 12px; 
-            cursor: pointer; 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            border: 1px solid var(--border);
-            font-weight: 600;
-            transition: background 0.2s;
-        }
+        .liga-fejlec { background: #f1f3f4; color: var(--dark); padding: 15px 20px; margin-top: 15px; cursor: pointer; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); font-weight: bold; }
+        .liga-tartalom { display: none; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; padding: 5px; background: #fff; }
 
-        .liga-fejlec:hover { background: #f1f3f4; }
-        .liga-fejlec .icon { color: var(--primary); font-size: 20px; }
-
-        .liga-tartalom { 
-            display: none; 
-            border: 1px solid var(--border); 
-            border-top: none; 
-            border-radius: 0 0 12px 12px; 
-            padding: 10px;
-            background: #fff;
-        }
-
-        /* Match Cards */
-        .meccs-kartya { 
-            padding: 20px; 
-            border-bottom: 1px solid #f1f3f4; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .meccs-kartya { padding: 15px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; align-items: center; text-align: center; }
         .meccs-kartya:last-child { border-bottom: none; }
+        .meccs-idopont { color: #1a73e8; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .meccs-nevek { font-size: 17px; font-weight: bold; margin-bottom: 12px; }
 
-        .meccs-nevek { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #1a202c; }
-
-        .analyze-btn { 
-            background: white; 
-            color: var(--success); 
-            border: 2px solid var(--success); 
-            padding: 10px 25px; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.3s;
-        }
-
+        .analyze-btn { background: white; color: var(--success); border: 2px solid var(--success); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .analyze-btn:hover { background: var(--success); color: white; }
 
-        /* Analysis Results */
-        .reszletek { width: 100%; margin-top: 20px; }
+        .reszletek { width: 100%; margin-top: 15px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 12px; }
+        .prediction-box { grid-column: span 2; background: #e8f0fe; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #c2e7ff; font-weight: bold; }
 
-        .stat-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            background: #f8f9fa; 
-            padding: 20px; 
-            border-radius: 15px; 
-        }
-
-        .prediction-box { 
-            grid-column: span 2; 
-            background: #e8f0fe; 
-            padding: 20px; 
-            border-radius: 12px; 
-            text-align: center;
-            border: 1px solid #c2e7ff;
-        }
-
-        .prediction-box b { font-size: 22px; color: var(--primary-dark); display: block; margin-top: 5px; }
-
-        /* Poisson Matrix Design */
-        .matrix-container { overflow-x: auto; margin-top: 20px; }
-        .matrix-table { margin: 10px auto; border-collapse: collapse; font-size: 13px; min-width: 100%; }
-        .matrix-table td, .matrix-table th { border: 1px solid #eee; padding: 12px 8px; text-align: center; }
-        .matrix-table th { background: #f8f9fa; color: #5f6368; font-weight: 500; }
-        
-        .prob-cell { color: #888; }
-        .high-prob { background: #e6f4ea !important; color: #137333 !important; font-weight: bold; border: 2px solid #34a853 !important; }
-        .top-prob { background: #fce8e6 !important; color: #c5221f !important; font-weight: bold; }
+        .matrix-container { overflow-x: auto; margin-top: 15px; }
+        .matrix-table { margin: 5px auto; border-collapse: collapse; font-size: 12px; width: 100%; }
+        .matrix-table td, .matrix-table th { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .matrix-table th { background: #eee; }
+        .high-prob { background: #34a853 !important; color: white !important; font-weight: bold; }
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -159,19 +54,18 @@
     <div class="container">
         <header>
             <h1>⚽ Tippmix AI Pro</h1>
-            <p>Szezonális átlagok és Poisson-valószínűségi mátrix</p>
+            <p>Top 10 Liga + UEFA Kupák | Poisson Elemzés</p>
         </header>
 
         <div class="content">
-            <button class="main-btn" onclick="betoltes()">MAI KÍNÁLAT FRISSÍTÉSE</button>
+            <button class="main-btn" onclick="betoltes()">TOP LIGÁK FRISSÍTÉSE</button>
             <div id="status" style="text-align:center; color:#5f6368; margin-bottom:15px;"></div>
             <div id="lista"></div>
         </div>
     </div>
 
     <script>
-    // --- KONFIGURÁCIÓ ---
-    // Ide írd be a Renderen kapott kék linket (a /api/meccsek rész NÉLKÜL)
+    // FONTOS: Ez legyen a te Renderes címed!
     const apiUrl = "https://mixseged-backend.onrender.com"; 
 
     function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }
@@ -184,19 +78,20 @@
         lista.innerHTML = "";
 
         try {
-            // Itt már az apiUrl-t használjuk localhost helyett
             const res = await fetch(`${apiUrl}/api/meccsek`);
             const adat = await res.json();
             
-            if (!adat.matches || adat.matches.length === 0) {
-                status.innerText = "Ma nincs több megjeleníthető mérkőzés.";
+            if (!adat || adat.length === 0) {
+                status.innerText = "Nincs elérhető meccs a várt ligákban.";
                 return;
             }
 
+            // Csoportosítás ligák szerint
             const csoportok = {};
-            adat.matches.forEach(m => {
-                if (!csoportok[m.competition.name]) csoportok[m.competition.name] = [];
-                csoportok[m.competition.name].push(m);
+            adat.forEach(m => {
+                const ligaNev = m.sport_title || "Egyéb Liga";
+                if (!csoportok[ligaNev]) csoportok[ligaNev] = [];
+                csoportok[ligaNev].push(m);
             });
 
             for (const liga in csoportok) {
@@ -210,11 +105,27 @@
                 tart.className = "liga-tartalom";
 
                 csoportok[liga].forEach(m => {
+                    let odds1 = "-", oddsX = "-", odds2 = "-";
+                    if(m.bookmakers && m.bookmakers.length > 0) {
+                        const market = m.bookmakers[0].markets.find(x => x.key === 'h2h');
+                        if(market) {
+                            const h = market.outcomes.find(o => o.name === m.home_team);
+                            const a = market.outcomes.find(o => o.name === m.away_team);
+                            const d = market.outcomes.find(o => o.name === 'Draw');
+                            if(h) odds1 = h.price;
+                            if(a) odds2 = a.price;
+                            if(d) oddsX = d.price;
+                        }
+                    }
+
+                    const meccsIdo = new Date(m.commence_time).toLocaleString('hu-HU', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+
                     const div = document.createElement("div");
                     div.className = "meccs-kartya";
                     div.innerHTML = `
-                        <div class="meccs-nevek">${m.homeTeam.shortName || m.homeTeam.name} - ${m.awayTeam.shortName || m.awayTeam.name}</div>
-                        <button class="analyze-btn" onclick="elemzes(this, ${m.homeTeam.id}, ${m.awayTeam.id}, '${m.homeTeam.shortName || m.homeTeam.name}', '${m.awayTeam.shortName || m.awayTeam.name}')">AI ELEMZÉS</button>
+                        <div class="meccs-idopont">📅 ${meccsIdo}</div>
+                        <div class="meccs-nevek">${m.home_team} - ${m.away_team}</div>
+                        <button class="analyze-btn" onclick="elemzes(this, '${m.home_team}', '${m.away_team}', '${odds1}', '${oddsX}', '${odds2}')">AI ELEMZÉS</button>
                         <div class="reszletek"></div>
                     `;
                     tart.appendChild(div);
@@ -230,77 +141,53 @@
                 ligaWrapper.appendChild(tart);
                 lista.appendChild(ligaWrapper);
             }
-            status.innerText = adat.matches.length + " mérkőzés betöltve.";
+            status.innerText = "Sikeres betöltés!";
         } catch (e) { 
-            console.error(e);
-            status.innerText = "Hiba: A szerver nem elérhető."; 
+            status.innerText = "Hiba a kapcsolódáskor."; 
         }
     }
 
-    async function elemzes(gomb, hId, vId, hNev, vNev) {
+    function elemzes(gomb, hNev, vNev, odds1, oddsX, odds2) {
         const reszletek = gomb.nextElementSibling;
-        reszletek.innerHTML = '<div class="loader"></div>';
-        gomb.disabled = true;
-        
-        try {
-            // Itt is az apiUrl-t használjuk
-            const [hR, vR] = await Promise.all([
-                fetch(`${apiUrl}/api/statisztika/${hId}`),
-                fetch(`${apiUrl}/api/statisztika/${vId}`)
-            ]);
-            const hD = await hR.json(); const vD = await vR.json();
-            const hS = getStat(hD.matches, hId); const vS = getStat(vD.matches, vId);
+        if(odds1 === "-") { reszletek.innerHTML = "Nincs odds."; return; }
 
-            const hExp = (hS.lott + vS.kapott) / 2;
-            const vExp = (vS.lott + hS.kapott) / 2;
+        const margin = (1 / odds1) + (1 / oddsX) + (1 / odds2);
+        const p1 = (1 / odds1) / margin;
+        const p2 = (1 / odds2) / margin;
 
-            let matrixHtml = `<div class="matrix-container"><table class="matrix-table"><tr><th>Gólok</th>`;
-            for(let i=0; i<=4; i++) matrixHtml += `<th>${hNev.substring(0,3)} ${i}</th>`;
-            matrixHtml += "</tr>";
+        let totalGoals = 2.65;
+        let supremacy = (p1 - p2) * 2.1;
+        let hExp = (totalGoals + supremacy) / 2;
+        let vExp = (totalGoals - supremacy) / 2;
+        if (hExp < 0.2) hExp = 0.2; if (vExp < 0.2) vExp = 0.2;
 
-            let maxP = 0; let bestS = "0-0";
+        let matrixHtml = `<div class="matrix-container"><table class="matrix-table"><tr><th>Gól</th>`;
+        for(let i=0; i<=3; i++) matrixHtml += `<th>H ${i}</th>`;
+        matrixHtml += "</tr>";
 
-            for(let v=0; v<=4; v++) {
-                matrixHtml += `<tr><th>${vNev.substring(0,3)} ${v}</th>`;
-                for(let h=0; h<=4; h++) {
-                    const p = (poisson(hExp, h) * poisson(vExp, v) * 100).toFixed(1);
-                    if(parseFloat(p) > maxP) { maxP = p; bestS = `${h} - ${v}`; }
-                    let cls = p > 10 ? 'high-prob' : '';
-                    matrixHtml += `<td class="prob-cell ${cls}">${p}%</td>`;
-                }
-                matrixHtml += "</tr>";
+        let maxP = 0; let bestS = "0-0";
+        for(let v=0; v<=3; v++) {
+            matrixHtml += `<tr><th>V ${v}</th>`;
+            for(let h=0; h<=3; h++) {
+                const p = (poisson(hExp, h) * poisson(vExp, v) * 100).toFixed(1);
+                if(parseFloat(p) > maxP) { maxP = p; bestS = `${h} - ${v}`; }
+                let cls = p > 12 ? 'high-prob' : '';
+                matrixHtml += `<td class="${cls}">${p}%</td>`;
             }
-            matrixHtml += "</table></div>";
-
-            reszletek.innerHTML = `
-                <div class="stat-grid">
-                    <div style="text-align:center">🏠 <b>${hNev}</b><br><span style="font-size:20px">${hS.lott.toFixed(2)}</span> lőtt/meccs</div>
-                    <div style="text-align:center">🚀 <b>${vNev}</b><br><span style="font-size:20px">${vS.lott.toFixed(2)}</span> lőtt/meccs</div>
-                    <div class="prediction-box">
-                        VÁRHATÓ VÉGEREDMÉNY:
-                        <b>${bestS}</b>
-                        <small>Valószínűség: ${maxP}% | Átlag gól: ${(hExp+vExp).toFixed(2)}</small>
-                    </div>
-                </div>
-                ${matrixHtml}
-            `;
-        } catch (e) { 
-            console.error(e);
-            reszletek.innerHTML = "Hiba az elemzéskor."; 
-            gomb.disabled = false; 
+            matrixHtml += "</tr>";
         }
-    }
+        matrixHtml += "</table></div>";
 
-    function getStat(m, id) {
-        const f = (m || []).filter(x => x.status === 'FINISHED').slice(-12);
-        if(f.length === 0) return { lott: 0, kapott: 0 };
-        let l=0, k=0;
-        f.forEach(x => {
-            if(x.homeTeam.id === id) { l+=x.score.fullTime.home; k+=x.score.fullTime.away; }
-            else { l+=x.score.fullTime.away; k+=x.score.fullTime.home; }
-        });
-        return { lott: l/f.length, kapott: k/f.length };
+        reszletek.innerHTML = `
+            <div class="stat-grid">
+                <div style="text-align:center">🏠 ${hExp.toFixed(1)} xG</div>
+                <div style="text-align:center">🚀 ${vExp.toFixed(1)} xG</div>
+                <div class="prediction-box">Tipp: ${bestS} (${maxP}%)</div>
+            </div>
+            ${matrixHtml}
+        `;
+        gomb.style.display = 'none';
     }
-</script>
+    </script>
 </body>
 </html>

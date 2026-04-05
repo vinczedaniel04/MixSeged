@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,38 +13,49 @@ builder.Services.AddHttpClient();
 var app = builder.Build();
 app.UseCors("EngeddKozel");
 
-app.MapGet("/", () => "A MixSeged szervere elindult - The Odds API-val!");
+app.MapGet("/", () => "MixSeged Pro Backend - Minden liga aktivalva!");
 
 app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactory, [FromServices] IConfiguration config) =>
 {
     try 
     {
         var client = clientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(20);
-
-        // Az új Odds API kulcs beolvasása a Render-ről
         var token = config["OddsApiKey"];
         
-        if (string.IsNullOrEmpty(token)) 
-            return Results.Problem("Hiba: Az OddsApiKey hianyzik a Renderrol!");
+        // A Te kívánságlistád:
+        string[] ligak = {
+            "soccer_epl",                  // Angol
+            "soccer_spain_la_liga",        // Spanyol
+            "soccer_germany_bundesliga",   // Német
+            "soccer_italy_serie_a",        // Olasz
+            "soccer_france_ligue_one",     // Francia
+            "soccer_uefa_champs_league",   // BL
+            "soccer_uefa_get_europa_league", // EL
+            "soccer_uefa_europa_conference_league", // Konferencia
+            "soccer_netherlands_ere_divisie", // Holland
+            "soccer_portugal_primeira_liga"  // Portugál
+        };
 
-        // Lekérjük a Premier League (soccer_epl) KÖZELGŐ meccseit és a H2H (1X2) oddsokat európai irodáktól
-        string url = $"https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey={token}&regions=eu&markets=h2h";
-        
-        var response = await client.GetAsync(url);
-        
-        if (!response.IsSuccessStatusCode)
+        var mindenMeccs = new List<object>();
+
+        foreach (var liga in ligak)
         {
-            var hiba = await response.Content.ReadAsStringAsync();
-            return Results.Problem($"API Hiba ({response.StatusCode}): {hiba}");
+            string url = $"https://api.the-odds-api.com/v4/sports/{liga}/odds/?apiKey={token}&regions=eu&markets=h2h";
+            var response = await client.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var meccsek = JsonSerializer.Deserialize<List<object>>(content);
+                if (meccsek != null) mindenMeccs.AddRange(meccsek);
+            }
         }
 
-        var content = await response.Content.ReadAsStringAsync();
-        return Results.Content(content, "application/json");
+        return Results.Ok(mindenMeccs);
     }
     catch (Exception ex)
     {
-        return Results.Problem($"Szerver hiba: {ex.Message}");
+        return Results.Problem($"Hiba: {ex.Message}");
     }
 });
 
