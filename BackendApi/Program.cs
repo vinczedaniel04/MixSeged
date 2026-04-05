@@ -1,11 +1,15 @@
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpClient();
+var builder = WebApplication.CreateBuilder(args); // 1. Itt hozzuk létre
+
+// 2. Itt adjuk hozzá a szolgáltatásokat (CORS, Controller stb.)
+builder.Services.AddControllers();
 builder.Services.AddCors(options => {
-    options.AddPolicy("EngeddKozel", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("EngeddKozel", policy => {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
-var app = builder.Build();
-app.UseCors("EngeddKozel");
+var app = builder.Build(); // 3. Itt ZÁRJUK LE a buildert
+app.UseCors("EngeddKozel"); // <--- Ennek ott kell lennie!
 
 // 1. ÖSSZES ELÉRHETŐ MECCS (Ma és a közeljövőben)
 app.MapGet("/api/meccsek", async (HttpClient client, IConfiguration config) =>

@@ -170,127 +170,137 @@
     </div>
 
     <script>
-        const port = "5047"; // <--- A TE PORTOD (pl. 5100)
+    // --- KONFIGURÁCIÓ ---
+    // Ide írd be a Renderen kapott kék linket (a /api/meccsek rész NÉLKÜL)
+    const apiUrl = "https://mixseged-backend.onrender.com"; 
 
-        function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }
-        function poisson(lambda, k) { return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k); }
+    function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }
+    function poisson(lambda, k) { return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k); }
 
-        async function betoltes() {
-            const lista = document.getElementById("lista");
-            const status = document.getElementById("status");
-            status.innerHTML = '<div class="loader"></div>';
-            lista.innerHTML = "";
+    async function betoltes() {
+        const lista = document.getElementById("lista");
+        const status = document.getElementById("status");
+        status.innerHTML = '<div class="loader"></div>';
+        lista.innerHTML = "";
 
-            try {
-                const res = await fetch(`http://localhost:${port}/api/meccsek`);
-                const adat = await res.json();
+        try {
+            // Itt már az apiUrl-t használjuk localhost helyett
+            const res = await fetch(`${apiUrl}/api/meccsek`);
+            const adat = await res.json();
+            
+            if (!adat.matches || adat.matches.length === 0) {
+                status.innerText = "Ma nincs több megjeleníthető mérkőzés.";
+                return;
+            }
+
+            const csoportok = {};
+            adat.matches.forEach(m => {
+                if (!csoportok[m.competition.name]) csoportok[m.competition.name] = [];
+                csoportok[m.competition.name].push(m);
+            });
+
+            for (const liga in csoportok) {
+                const ligaWrapper = document.createElement("div");
                 
-                if (!adat.matches || adat.matches.length === 0) {
-                    status.innerText = "Ma nincs több megjeleníthető mérkőzés.";
-                    return;
-                }
+                const fej = document.createElement("div");
+                fej.className = "liga-fejlec";
+                fej.innerHTML = `<span>🏆 ${liga}</span> <span class="icon">▼</span>`;
+                
+                const tart = document.createElement("div");
+                tart.className = "liga-tartalom";
 
-                const csoportok = {};
-                adat.matches.forEach(m => {
-                    if (!csoportok[m.competition.name]) csoportok[m.competition.name] = [];
-                    csoportok[m.competition.name].push(m);
+                csoportok[liga].forEach(m => {
+                    const div = document.createElement("div");
+                    div.className = "meccs-kartya";
+                    div.innerHTML = `
+                        <div class="meccs-nevek">${m.homeTeam.shortName || m.homeTeam.name} - ${m.awayTeam.shortName || m.awayTeam.name}</div>
+                        <button class="analyze-btn" onclick="elemzes(this, ${m.homeTeam.id}, ${m.awayTeam.id}, '${m.homeTeam.shortName || m.homeTeam.name}', '${m.awayTeam.shortName || m.awayTeam.name}')">AI ELEMZÉS</button>
+                        <div class="reszletek"></div>
+                    `;
+                    tart.appendChild(div);
                 });
 
-                for (const liga in csoportok) {
-                    const ligaWrapper = document.createElement("div");
-                    
-                    const fej = document.createElement("div");
-                    fej.className = "liga-fejlec";
-                    fej.innerHTML = `<span>🏆 ${liga}</span> <span class="icon">▼</span>`;
-                    
-                    const tart = document.createElement("div");
-                    tart.className = "liga-tartalom";
+                fej.onclick = () => {
+                    const vis = tart.style.display === "block";
+                    tart.style.display = vis ? "none" : "block";
+                    fej.querySelector(".icon").innerText = vis ? "▼" : "▲";
+                };
 
-                    csoportok[liga].forEach(m => {
-                        const div = document.createElement("div");
-                        div.className = "meccs-kartya";
-                        div.innerHTML = `
-                            <div class="meccs-nevek">${m.homeTeam.shortName || m.homeTeam.name} - ${m.awayTeam.shortName || m.awayTeam.name}</div>
-                            <button class="analyze-btn" onclick="elemzes(this, ${m.homeTeam.id}, ${m.awayTeam.id}, '${m.homeTeam.shortName || m.homeTeam.name}', '${m.awayTeam.shortName || m.awayTeam.name}')">AI ELEMZÉS</button>
-                            <div class="reszletek"></div>
-                        `;
-                        tart.appendChild(div);
-                    });
-
-                    fej.onclick = () => {
-                        const vis = tart.style.display === "block";
-                        tart.style.display = vis ? "none" : "block";
-                        fej.querySelector(".icon").innerText = vis ? "▼" : "▲";
-                    };
-
-                    ligaWrapper.appendChild(fej);
-                    ligaWrapper.appendChild(tart);
-                    lista.appendChild(ligaWrapper);
-                }
-                status.innerText = adat.matches.length + " mérkőzés betöltve.";
-            } catch (e) { status.innerText = "Hiba: A szerver nem elérhető."; }
+                ligaWrapper.appendChild(fej);
+                ligaWrapper.appendChild(tart);
+                lista.appendChild(ligaWrapper);
+            }
+            status.innerText = adat.matches.length + " mérkőzés betöltve.";
+        } catch (e) { 
+            console.error(e);
+            status.innerText = "Hiba: A szerver nem elérhető."; 
         }
+    }
 
-        async function elemzes(gomb, hId, vId, hNev, vNev) {
-            const reszletek = gomb.nextElementSibling;
-            reszletek.innerHTML = '<div class="loader"></div>';
-            gomb.disabled = true;
-            
-            try {
-                const [hR, vR] = await Promise.all([
-                    fetch(`http://localhost:${port}/api/statisztika/${hId}`),
-                    fetch(`http://localhost:${port}/api/statisztika/${vId}`)
-                ]);
-                const hD = await hR.json(); const vD = await vR.json();
-                const hS = getStat(hD.matches, hId); const vS = getStat(vD.matches, vId);
+    async function elemzes(gomb, hId, vId, hNev, vNev) {
+        const reszletek = gomb.nextElementSibling;
+        reszletek.innerHTML = '<div class="loader"></div>';
+        gomb.disabled = true;
+        
+        try {
+            // Itt is az apiUrl-t használjuk
+            const [hR, vR] = await Promise.all([
+                fetch(`${apiUrl}/api/statisztika/${hId}`),
+                fetch(`${apiUrl}/api/statisztika/${vId}`)
+            ]);
+            const hD = await hR.json(); const vD = await vR.json();
+            const hS = getStat(hD.matches, hId); const vS = getStat(vD.matches, vId);
 
-                const hExp = (hS.lott + vS.kapott) / 2;
-                const vExp = (vS.lott + hS.kapott) / 2;
+            const hExp = (hS.lott + vS.kapott) / 2;
+            const vExp = (vS.lott + hS.kapott) / 2;
 
-                // Matrix UI building
-                let matrixHtml = `<div class="matrix-container"><table class="matrix-table"><tr><th>Gólok</th>`;
-                for(let i=0; i<=4; i++) matrixHtml += `<th>${hNev.substring(0,3)} ${i}</th>`;
+            let matrixHtml = `<div class="matrix-container"><table class="matrix-table"><tr><th>Gólok</th>`;
+            for(let i=0; i<=4; i++) matrixHtml += `<th>${hNev.substring(0,3)} ${i}</th>`;
+            matrixHtml += "</tr>";
+
+            let maxP = 0; let bestS = "0-0";
+
+            for(let v=0; v<=4; v++) {
+                matrixHtml += `<tr><th>${vNev.substring(0,3)} ${v}</th>`;
+                for(let h=0; h<=4; h++) {
+                    const p = (poisson(hExp, h) * poisson(vExp, v) * 100).toFixed(1);
+                    if(parseFloat(p) > maxP) { maxP = p; bestS = `${h} - ${v}`; }
+                    let cls = p > 10 ? 'high-prob' : '';
+                    matrixHtml += `<td class="prob-cell ${cls}">${p}%</td>`;
+                }
                 matrixHtml += "</tr>";
+            }
+            matrixHtml += "</table></div>";
 
-                let maxP = 0; let bestS = "0-0";
-
-                for(let v=0; v<=4; v++) {
-                    matrixHtml += `<tr><th>${vNev.substring(0,3)} ${v}</th>`;
-                    for(let h=0; h<=4; h++) {
-                        const p = (poisson(hExp, h) * poisson(vExp, v) * 100).toFixed(1);
-                        if(parseFloat(p) > maxP) { maxP = p; bestS = `${h} - ${v}`; }
-                        let cls = p > 10 ? 'high-prob' : '';
-                        matrixHtml += `<td class="prob-cell ${cls}">${p}%</td>`;
-                    }
-                    matrixHtml += "</tr>";
-                }
-                matrixHtml += "</table></div>";
-
-                reszletek.innerHTML = `
-                    <div class="stat-grid">
-                        <div style="text-align:center">🏠 <b>${hNev}</b><br><span style="font-size:20px">${hS.lott.toFixed(2)}</span> lőtt/meccs</div>
-                        <div style="text-align:center">🚀 <b>${vNev}</b><br><span style="font-size:20px">${vS.lott.toFixed(2)}</span> lőtt/meccs</div>
-                        <div class="prediction-box">
-                            VÁRHATÓ VÉGEREDMÉNY:
-                            <b>${bestS}</b>
-                            <small>Valószínűség: ${maxP}% | Átlag gól: ${(hExp+vExp).toFixed(2)}</small>
-                        </div>
+            reszletek.innerHTML = `
+                <div class="stat-grid">
+                    <div style="text-align:center">🏠 <b>${hNev}</b><br><span style="font-size:20px">${hS.lott.toFixed(2)}</span> lőtt/meccs</div>
+                    <div style="text-align:center">🚀 <b>${vNev}</b><br><span style="font-size:20px">${vS.lott.toFixed(2)}</span> lőtt/meccs</div>
+                    <div class="prediction-box">
+                        VÁRHATÓ VÉGEREDMÉNY:
+                        <b>${bestS}</b>
+                        <small>Valószínűség: ${maxP}% | Átlag gól: ${(hExp+vExp).toFixed(2)}</small>
                     </div>
-                    ${matrixHtml}
-                `;
-            } catch (e) { reszletek.innerHTML = "Hiba az elemzéskor."; gomb.disabled = false; }
+                </div>
+                ${matrixHtml}
+            `;
+        } catch (e) { 
+            console.error(e);
+            reszletek.innerHTML = "Hiba az elemzéskor."; 
+            gomb.disabled = false; 
         }
+    }
 
-        function getStat(m, id) {
-            const f = (m || []).filter(x => x.status === 'FINISHED').slice(-12);
-            if(f.length === 0) return { lott: 0, kapott: 0 };
-            let l=0, k=0;
-            f.forEach(x => {
-                if(x.homeTeam.id === id) { l+=x.score.fullTime.home; k+=x.score.fullTime.away; }
-                else { l+=x.score.fullTime.away; k+=x.score.fullTime.home; }
-            });
-            return { lott: l/f.length, kapott: k/f.length };
-        }
-    </script>
+    function getStat(m, id) {
+        const f = (m || []).filter(x => x.status === 'FINISHED').slice(-12);
+        if(f.length === 0) return { lott: 0, kapott: 0 };
+        let l=0, k=0;
+        f.forEach(x => {
+            if(x.homeTeam.id === id) { l+=x.score.fullTime.home; k+=x.score.fullTime.away; }
+            else { l+=x.score.fullTime.away; k+=x.score.fullTime.home; }
+        });
+        return { lott: l/f.length, kapott: k/f.length };
+    }
+</script>
 </body>
 </html>
