@@ -1,42 +1,58 @@
-var builder = WebApplication.CreateBuilder(args); // 1. Itt hozzuk létre
+using Microsoft.AspNetCore.Mvc;
 
-// 2. Itt adjuk hozzá a szolgáltatásokat (CORS, Controller stb.)
-builder.Services.AddControllers();
-builder.Services.AddCors(options => {
-    options.AddPolicy("EngeddKozel", policy => {
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. CORS beállítása a Netlify-hoz
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("EngeddKozel", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
-var app = builder.Build(); // 3. Itt ZÁRJUK LE a buildert
-app.UseCors("EngeddKozel"); // <--- Ennek ott kell lennie!
+builder.Services.AddControllers();
+// Regisztráljuk a HttpClient-et a rendszerbe
+builder.Services.AddHttpClient();
 
-// 1. ÖSSZES ELÉRHETŐ MECCS (Ma és a közeljövőben)
-app.MapGet("/api/meccsek", async (HttpClient client, IConfiguration config) =>
+var app = builder.Build();
+
+// 2. Middleware-ek bekapcsolása
+app.UseCors("EngeddKozel");
+
+// 3. API Végpontok
+
+// MECCSEK LEKÉRÉSE
+app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactory, [FromServices] IConfiguration config) =>
 {
-    var apiKey = config["FootballDataToken"];
-    var request = new HttpRequestMessage {
-        Method = HttpMethod.Get,
-        RequestUri = new Uri("https://api.football-data.org/v4/matches"),
-        Headers = { { "X-Auth-Token", apiKey } }
-    };
-    var response = await client.SendAsync(request);
-    var tartalom = await response.Content.ReadAsStringAsync();
-    return Results.Content(tartalom, "application/json");
+    var client = clientFactory.CreateClient();
+    var token = config["FootballDataToken"]; // A Render-en beállított Environment Variable
+    
+    client.DefaultRequestHeaders.Add("X-Auth-Token", token);
+    
+    // Példa: Premier League (2021) meccsek, módosítsd ha több ligát akarsz
+    var response = await client.GetAsync("https://api.football-data.org/v4/matches");
+    var content = await response.Content.ReadAsStringAsync();
+    
+    return Results.Content(content, "application/json");
 });
 
-// 2. CSAPAT STATISZTIKA AZ ELEMZÉSHEZ
-app.MapGet("/api/statisztika/{csapatId}", async (int csapatId, HttpClient client, IConfiguration config) =>
+// STATISZTIKA LEKÉRÉSE (Csapat ID alapján)
+app.MapGet("/api/statisztika/{id}", async (int id, [FromServices] IHttpClientFactory clientFactory, [FromServices] IConfiguration config) =>
 {
-    var apiKey = config["FootballDataToken"];
-    var request = new HttpRequestMessage {
-        Method = HttpMethod.Get,
-        RequestUri = new Uri($"https://api.football-data.org/v4/teams/{csapatId}/matches?status=FINISHED"),
-        Headers = { { "X-Auth-Token", apiKey } }
-    };
-    var response = await client.SendAsync(request);
-    var tartalom = await response.Content.ReadAsStringAsync();
-    return Results.Content(tartalom, "application/json");
+    var client = clientFactory.CreateClient();
+    var token = config["FootballDataToken"];
+    
+    client.DefaultRequestHeaders.Add("X-Auth-Token", token);
+    
+    var response = await client.GetAsync($"https://api.football-data.org/v4/teams/{id}/matches?status=FINISHED");
+    var content = await response.Content.ReadAsStringAsync();
+    
+    return Results.Content(content, "application/json");
 });
+
+app.MapControllers();
 
 app.Run();
