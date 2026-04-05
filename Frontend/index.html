@@ -92,13 +92,14 @@
         }
         .meccs-kartya:last-child { border-bottom: none; }
 
-        .status-badge { font-size: 11px; font-weight: 900; padding: 5px 12px; border-radius: 30px; margin-bottom: 12px; letter-spacing: 1px; }
+        .status-badge { font-size: 11px; font-weight: 900; padding: 5px 12px; border-radius: 30px; margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
         .status-future { background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid var(--primary); }
-        .status-live { background: var(--danger); color: white; animation: pulse 2s infinite; }
+        .status-live { background: var(--danger); color: white; animation: pulse 2s infinite; border: 1px solid var(--danger); }
+        .status-finished { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        .meccs-nevek { font-size: 22px; font-weight: 900; margin-bottom: 20px; text-align: center; letter-spacing: -0.5px; }
+        .meccs-nevek { font-size: 22px; font-weight: 900; margin-bottom: 20px; text-align: center; letter-spacing: -0.5px; color: white; }
 
         .analyze-btn { 
             background: #0f172a; 
@@ -114,7 +115,6 @@
 
         .analyze-btn:hover { background: var(--success); color: white; }
 
-        /* Analízis Panel */
         .reszletek { width: 100%; margin-top: 25px; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -158,7 +158,7 @@
     <div class="container">
         <header>
             <h1>⚽ TIPPMIX AI LABOR</h1>
-            <p>Advanced Poisson Analytics & Live Odds Tracking</p>
+            <p>Advanced Poisson Analytics & 24H Live Tracking</p>
         </header>
 
         <div class="content">
@@ -181,7 +181,8 @@
         lista.innerHTML = "";
 
         try {
-            const res = await fetch(`${apiUrl}/api/meccsek`);
+            // Cache-törlés időbélyeggel
+            const res = await fetch(`${apiUrl}/api/meccsek?v=${Date.now()}`);
             const adat = await res.json();
             
             if (!adat || adat.length === 0) {
@@ -189,16 +190,24 @@
                 return;
             }
 
-            const ma = new Date().getDate();
-            const maiMeccsek = adat.filter(m => new Date(m.commence_time).getDate() === ma);
+            // SZŰRÉS: Ma és Holnap (24 órás ablak)
+            const ma = new Date();
+            const holnap = new Date();
+            holnap.setDate(ma.getDate() + 1);
 
-            if (maiMeccsek.length === 0) {
-                status.innerText = "Mára minden top mérkőzés véget ért.";
+            const megjelenitendoMeccsek = adat.filter(m => {
+                const meccsIdo = new Date(m.commence_time);
+                return (meccsIdo.getDate() === ma.getDate() || meccsIdo.getDate() === holnap.getDate()) &&
+                       meccsIdo.getMonth() === ma.getMonth();
+            });
+
+            if (megjelenitendoMeccsek.length === 0) {
+                status.innerText = "A következő 24 órában nincs több mérkőzés a listában.";
                 return;
             }
 
             const csoportok = {};
-            maiMeccsek.forEach(m => {
+            megjelenitendoMeccsek.forEach(m => {
                 const liga = m.sport_title || "Egyéb";
                 if (!csoportok[liga]) csoportok[liga] = [];
                 csoportok[liga].push(m);
@@ -236,7 +245,7 @@
                     div.innerHTML = `
                         <div class="status-badge ${stCls}">${stTxt}</div>
                         <div class="meccs-nevek">${m.home_team} - ${m.away_team}</div>
-                        <button class="analyze-btn" onclick="elemzes(this, '${m.home_team}', '${m.away_team}', ${o1}, ${oX}, ${o2})">Analízis indítása</button>
+                        <button class="analyze-btn" onclick="elemzes(this, '${m.home_team}', '${m.away_team}', ${o1}, ${oX}, ${o2})">Analízis</button>
                         <div class="reszletek"></div>
                     `;
                     tart.appendChild(div);
@@ -247,7 +256,7 @@
                 ligaWrapper.appendChild(tart);
                 lista.appendChild(ligaWrapper);
             }
-            status.innerText = "RENDSZER ONLINE - ADATOK FRISSÍTVE";
+            status.innerText = "RENDSZER ONLINE - 24H KÍNÁLAT BETÖLTVE";
         } catch (e) { status.innerText = "Szerver hiba!"; }
     }
 
@@ -256,10 +265,9 @@
         const margin = (1/o1) + (1/oX) + (1/o2);
         const p1 = (1/o1)/margin, p2 = (1/o2)/margin;
 
-        // Várható gólok számítása odds alapján (Finomított modell)
         let baseGoals = 2.75;
-        let hExp = baseGoals * p1 * 1.25;
-        let vExp = baseGoals * p2 * 1.25;
+        let hExp = baseGoals * p1 * 1.3; // Enyhén felerősített támadó érték
+        let vExp = baseGoals * p2 * 1.3;
 
         let maxP = 0, bestS = "0-0", results = [];
         let over25 = 0, bts = 0;
@@ -295,7 +303,7 @@
                 <div class="xg-box"><span>VENDÉG xG</span><b class="xg-value">${vExp.toFixed(2)}</b></div>
                 
                 <div class="prediction-main">
-                    <span>Legvalószínűbb végeredmény</span>
+                    <span>AI TIPP</span>
                     <b>${bestS}</b>
                     <span>Valószínűség: ${maxP}%</span>
                 </div>
