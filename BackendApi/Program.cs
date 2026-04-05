@@ -12,10 +12,8 @@ builder.Services.AddHttpClient();
 var app = builder.Build();
 app.UseCors("EngeddKozel");
 
-// ALAP TESZT - Ezt látod a főoldalon
-app.MapGet("/", () => "A MixSeged szervere elindult!");
+app.MapGet("/", () => "A MixSeged szervere elindult - API-Football v3!");
 
-// MECCSEK LEKÉRÉSE - Szűrt változat a gyorsaságért
 app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactory, [FromServices] IConfiguration config) =>
 {
     try 
@@ -23,16 +21,19 @@ app.MapGet("/api/meccsek", async ([FromServices] IHttpClientFactory clientFactor
         var client = clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(20);
 
-        // A Renderen beállított környezeti változót olvassa ki
-        var token = config["FootballDataToken"];
+        // Az új környezeti változónk beolvasása a Render-ről
+        var token = config["ApiFootballToken"];
         
         if (string.IsNullOrEmpty(token)) 
-            return Results.Problem("Hiba: Az API kulcs (Token) hianyzik a Renderrol!");
+            return Results.Problem("Hiba: Az ApiFootballToken hianyzik a Renderrol!");
 
-        client.DefaultRequestHeaders.Add("X-Auth-Token", token);
+        // Az API-Football azonosítása a te kulcsoddal
+        client.DefaultRequestHeaders.Add("x-apisports-key", token);
         
-        // Csak az Angol bajnokság (PL) - ez a legstabilabb
-        var response = await client.GetAsync("https://api.football-data.org/v4/competitions/PL/matches?status=SCHEDULED");
+        // Lekérjük az Angol Premier League (league=39) következő 10 meccsét (next=10)
+        // Mivel 2026-ban vagyunk, a futó szezon a 2025-ös (2025/2026)
+        string url = "https://v3.football.api-sports.io/fixtures?league=39&season=2025&next=10";
+        var response = await client.GetAsync(url);
         
         if (!response.IsSuccessStatusCode)
         {
